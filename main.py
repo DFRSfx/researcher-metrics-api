@@ -3,6 +3,9 @@ from fastapi import FastAPI, Query
 from scholarly import scholarly, ProxyGenerator
 from pybliometrics.scopus import AuthorRetrieval
 import os
+import threading
+
+_scholarly_lock = threading.Lock()
 
 
 @asynccontextmanager
@@ -24,7 +27,8 @@ def get_metrics(
 
     if scholar_id:
         try:
-            author = scholarly.fill(scholarly.search_author_id(scholar_id), sections=["basics", "indices"])
+            with _scholarly_lock:
+                author = scholarly.fill(scholarly.search_author_id(scholar_id), sections=["basics", "indices"])
             result["scholar"] = {
                 "name": author.get("name"),
                 "h_index": author.get("hindex"),
