@@ -1,3 +1,6 @@
 fastapi
 pybliometrics
 scholarly
+requests
+beautifulsoup4
+httpx>=0.24.0,<0.28.0

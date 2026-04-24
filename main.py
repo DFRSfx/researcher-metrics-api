@@ -1,14 +1,19 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, Query
 from scholarly import scholarly, ProxyGenerator
 from pybliometrics.scopus import AuthorRetrieval
 import os
 
-app = FastAPI()
 
-# Inicializa o proxy ScraperAPI uma vez ao arrancar
-pg = ProxyGenerator()
-pg.ScraperAPI(os.environ["SCRAPERAPI_KEY"])  # ← a tua key
-scholarly.use_proxy(pg)
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    pg = ProxyGenerator()
+    pg.ScraperAPI(os.environ["SCRAPERAPI_KEY"])
+    scholarly.use_proxy(pg)
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
 
 @app.get("/metrics")
 def get_metrics(
