@@ -1,6 +1,7 @@
 fastapi
-pybliometrics
-scholarly
+uvicorn
 requests
 beautifulsoup4
+selenium
+webdriver-manager
 httpx>=0.24.0,<0.28.0
