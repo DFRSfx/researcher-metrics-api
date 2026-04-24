@@ -23,21 +23,17 @@ def _cache_set(key: str, data: dict):
     _cache[key] = {"data": data, "ts": time.time()}
 
 
-def _fetch_scholar_openalex(scholar_id: str) -> dict | None:
-    url = "https://api.openalex.org/authors"
-    profile_url = f"https://scholar.google.com/citations?user={scholar_id}"
+def _fetch_openalex_by_scopus(scopus_id: str) -> dict | None:
     try:
         resp = requests.get(
-            url,
-            params={"filter": f"ids.google_scholar:{profile_url}", "select": "display_name,summary_stats,cited_by_count,works_count"},
+            f"https://api.openalex.org/authors/scopus:{scopus_id}",
+            params={"select": "display_name,summary_stats,cited_by_count,works_count"},
             headers={"User-Agent": "researcher-metrics-api/1.0 (mailto:dariofrsoares@gmail.com)"},
             timeout=10,
         )
-        resp.raise_for_status()
-        results = resp.json().get("results", [])
-        if not results:
+        if resp.status_code != 200:
             return None
-        author = results[0]
+        author = resp.json()
         stats = author.get("summary_stats", {})
         h_index = stats.get("h_index")
         if not h_index:
@@ -98,9 +94,7 @@ def get_metrics(
             result["scholar"] = cached
         else:
             try:
-                data = _fetch_scholar_openalex(scholar_id)
-                if data is None:
-                    data = _fetch_scholar_scholarly(scholar_id)
+                data = _fetch_scholar_scholarly(scholar_id)
                 _cache_set(f"scholar:{scholar_id}", data)
                 result["scholar"] = data
             except Exception as e:
@@ -112,13 +106,16 @@ def get_metrics(
             result["scopus"] = cached
         else:
             try:
-                au = AuthorRetrieval(scopus_id)
-                data = {
-                    "name": au.indexed_name,
-                    "h_index": au.h_index,
-                    "citations": au.cited_by_count,
-                    "documents": au.document_count,
-                }
+                data = _fetch_openalex_by_scopus(scopus_id)
+                if data is None:
+                    au = AuthorRetrieval(scopus_id)
+                    data = {
+                        "name": au.indexed_name,
+                        "h_index": au.h_index,
+                        "citations": au.cited_by_count,
+                        "documents": au.document_count,
+                        "source": "scopus",
+                    }
                 _cache_set(f"scopus:{scopus_id}", data)
                 result["scopus"] = data
             except Exception as e:
