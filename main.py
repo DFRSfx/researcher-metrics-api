@@ -70,9 +70,10 @@ async def lifespan(app: FastAPI):
     # Write pybliometrics config from env var (no persistent filesystem on Vercel)
     scopus_key = os.environ.get("SCOPUS_API_KEY", "")
     if scopus_key:
-        config_dir = os.path.expanduser("~/.config/pybliometrics/Scopus")
+        config_dir = "/tmp/pybliometrics/Scopus"
         os.makedirs(config_dir, exist_ok=True)
-        config_path = os.path.expanduser("~/.config/pybliometrics/pybliometrics.cfg")
+        config_path = "/tmp/pybliometrics/pybliometrics.cfg"
+        os.environ["PYB_CONFIG_FILE"] = config_path
         with open(config_path, "w") as f:
             f.write(f"[Authentication]\nAPIKey = {scopus_key}\n")
 
