@@ -24,7 +24,7 @@ def get_metrics(
 
     if scholar_id:
         try:
-            author = scholarly.fill(scholarly.search_author_id(scholar_id))
+            author = scholarly.fill(scholarly.search_author_id(scholar_id), sections=["basics", "indices"])
             result["scholar"] = {
                 "name": author.get("name"),
                 "h_index": author.get("hindex"),
