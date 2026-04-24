@@ -68,17 +68,16 @@ def _fetch_scholar_scholarly(scholar_id: str) -> dict:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Write pybliometrics config from env var (no persistent filesystem on Vercel)
-    scopus_key = os.environ.get("SCOPUS_API_KEY", "")
-    if scopus_key:
-        config_dir = "/tmp/pybliometrics/Scopus"
-        os.makedirs(config_dir, exist_ok=True)
-        config_path = "/tmp/pybliometrics/pybliometrics.cfg"
-        os.environ["PYB_CONFIG_FILE"] = config_path
-        with open(config_path, "w") as f:
-            f.write(f"[Authentication]\nAPIKey = {scopus_key}\n")
+    scopus_key = "9f09f1bdd9719456decd316ef59a4d70"
+    config_dir = "/tmp/pybliometrics/Scopus"
+    os.makedirs(config_dir, exist_ok=True)
+    config_path = "/tmp/pybliometrics/pybliometrics.cfg"
+    os.environ["PYB_CONFIG_FILE"] = config_path
+    with open(config_path, "w") as f:
+        f.write(f"[Authentication]\nAPIKey = {scopus_key}\n")
 
     pg = ProxyGenerator()
-    pg.ScraperAPI(os.environ["SCRAPERAPI_KEY"])
+    pg.ScraperAPI("3a70ca2369ad3945c2e46ff97ec0b571")
     scholarly.use_proxy(pg)
     yield
 
